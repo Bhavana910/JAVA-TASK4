@@ -1,0 +1,108 @@
+import java.sql.*;
+import java.util.Scanner;
+
+public class SimpleStudentManagement {
+public static void main(String[] args) {
+Scanner sc = new Scanner(System.in);
+Connection con = null;
+
+String url = "jdbc:mysql://localhost:3306/sms_db"; // Change DB name
+String user = "root"; // Change username
+String pass = "your_password"; // Change password
+
+try {
+// Load MySQL Driver
+Class.forName("com.mysql.cj.jdbc.Driver");
+con = DriverManager.getConnection(url, user, pass);
+System.out.println("Connected to Database!");
+
+while (true) {
+System.out.println("\n---- Student Management System ----");
+System.out.println("1. Add Student");
+System.out.println("2. View All Students");
+System.out.println("3. Update Student");
+System.out.println("4. Delete Student");
+System.out.println("5. Exit");
+System.out.print("Enter choice: ");
+int ch = sc.nextInt();
+sc.nextLine(); // consume newline
+
+switch (ch) {
+case 1:
+System.out.print("Enter Name: ");
+String name = sc.nextLine();
+System.out.print("Enter Age: ");
+int age = sc.nextInt();
+sc.nextLine();
+System.out.print("Enter Course: ");
+String course = sc.nextLine();
+
+String insert = "INSERT INTO students(name, age, course) VALUES (?, ?, ?)";
+PreparedStatement ps = con.prepareStatement(insert);
+ps.setString(1, name);
+ps.setInt(2, age);
+ps.setString(3, course);
+ps.executeUpdate();
+System.out.println("✅ Student added!");
+break;
+
+case 2:
+Statement st = con.createStatement();
+ResultSet rs = st.executeQuery("SELECT * FROM students");
+System.out.println("\nID\tName\tAge\tCourse");
+while (rs.next()) {
+System.out.println(rs.getInt(1) + "\t" +
+rs.getString(2) + "\t" +
+rs.getInt(3) + "\t" +
+rs.getString(4));
+}
+break;
+
+case 3:
+System.out.print("Enter Student ID to Update: ");
+int idu = sc.nextInt();
+sc.nextLine();
+System.out.print("Enter New Name: ");
+String newName = sc.nextLine();
+System.out.print("Enter New Age: ");
+int newAge = sc.nextInt();
+sc.nextLine();
+System.out.print("Enter New Course: ");
+String newCourse = sc.nextLine();
+
+String update = "UPDATE students SET name=?, age=?, course=? WHERE id=?";
+PreparedStatement psu = con.prepareStatement(update);
+psu.setString(1, newName);
+psu.setInt(2, newAge);
+psu.setString(3, newCourse);
+psu.setInt(4, idu);
+psu.executeUpdate();
+System.out.println("✅ Student updated!");
+break;
+
+case 4:
+System.out.print("Enter Student ID to Delete: ");
+int idd = sc.nextInt();
+String delete = "DELETE FROM students WHERE id=?";
+PreparedStatement psd = con.prepareStatement(delete);
+psd.setInt(1, idd);
+psd.executeUpdate();
+System.out.println("✅ Student deleted!");
+break;
+
+case 5:
+System.out.println("Exiting...");
+con.close();
+sc.close();
+return;
+
+default:
+System.out.println("Invalid choice!");
+}
+}
+
+} catch (Exception e) {
+System.out.println("Error: " + e.getMessage());
+}
+}
+}
